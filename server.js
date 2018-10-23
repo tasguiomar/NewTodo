@@ -37,6 +37,8 @@ app.use('/register', require('./controllers/register.controller'));
 app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 
+//app.use('/app/home', require('.//app/home/core'));
+
 // make '/app' default route
 app.get('/', function (req, res) {
     return res.redirect('/app');
