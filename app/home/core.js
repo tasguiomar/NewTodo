@@ -1,6 +1,5 @@
-
 'use strict';
-//var scotchTodo = angular.module('scotchTodo', []);
+var scotchTodo = angular.module('scotchTodo', []);
 
  angular.module('app')
 		.controller('mainController', function ($scope, $http) {
@@ -21,6 +20,7 @@
 	$scope.createTodo = function() {
 		$http.post('/api/todos', $scope.formData)
 			.success(function(data) {
+				console.log("o gajo passa no criar todo");
 				$scope.formData = {}; // clear the form so our user is ready to enter another
 				$scope.todos = data;
 				console.log(data);
