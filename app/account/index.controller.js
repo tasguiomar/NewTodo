@@ -21,7 +21,7 @@
             });
         }
 
-        function saveUser() {
+    function saveUser() {
             UserService.Update(vm.user)
                 .then(function () {
                     FlashService.Success('User updated');

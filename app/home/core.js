@@ -1,10 +1,11 @@
+
 'use strict';
-var scotchTodo = angular.module('scotchTodo', []);
- angular
-        .module('scotchTodo')
-		.controller('mainController', function ($localStorage, $scope, $mdDialog, $location, todoService, $mdToast, configService, autenticationService) {
-		
-function mainController($scope, $http) {
+//var scotchTodo = angular.module('scotchTodo', []);
+
+ angular.module('app')
+		.controller('mainController', function ($scope, $http) {
+
+
 	$scope.formData = {};
 
 	$http.get('/api/todos')
@@ -56,5 +57,5 @@ function mainController($scope, $http) {
 		});
 		dataService.createTodo(filterTodos);
 	};
-}
+
 });
