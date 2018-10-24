@@ -22,7 +22,7 @@ module.exports = function(app) {
 
 		// create a todo, information comes from AJAX request from Angular
 		Todo.create({
-			text : req.todos.text,
+			text : req.text,
 			done : false
 		}, function(err, todo) {
 			if (err)
