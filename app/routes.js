@@ -1,4 +1,5 @@
 var Todo = require('./models/todo');
+//var user = require('request'); vamos ver ainda como vu buscar o user indicado
 
 module.exports = function(app) {
 
@@ -20,7 +21,7 @@ module.exports = function(app) {
 	// create todo and send back all todos after creation
 	app.post('/api/todos', function(req, res) {
 
-		// create a todo, information comes from AJAX request from Angular
+
 		Todo.create({
 			text : req.text,
 			done : false
