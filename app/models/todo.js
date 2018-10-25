@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 module.exports = mongoose.model('Todo', {
-	user : String,
+	userDb : String,
 	text : String,
 	done : Boolean
 });

@@ -1,15 +1,18 @@
 var Todo = require('./models/todo');
-const basicAuth = require('basic-auth');
+//const basicAuth = require('basic-auth');
+var username = require('username')
+
 
 module.exports = function(app) {
 
 	// api ---------------------------------------------------------------------
 	// get all todos
 	app.get('/api/todos', function(req, res) {
-
+		
 		// use mongoose to get all todos in the database
-		Todo.find(function(err, todos) {
-
+		Todo.find({
+			 userDb : username.name}, function(err, todos) {
+			
 			// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 			if (err)
 				res.send(err)
@@ -20,11 +23,10 @@ module.exports = function(app) {
 
 	// create todo and send back all todos after creation
 	app.post('/api/todos', function(req, res) {
-		var test = basicAuth(req);
-		
-
+	
+		var test = username.name
 		Todo.create({
-			//user : test.name,
+			userDb : test,
 			text : req.body.text,
 			done : false
 		}, function(err, todo) {
