@@ -2,7 +2,6 @@ var Todo = require('./models/todo');
 //const basicAuth = require('basic-auth');
 var username = require('username')
 
-
 module.exports = function(app) {
 
 	// api ---------------------------------------------------------------------
@@ -34,7 +33,8 @@ module.exports = function(app) {
 				res.send(err);
 
 			// get and return all the todos after you create another
-			Todo.find(function(err, todos) {
+			Todo.find({
+				userDb : username.name},function(err, todos) {
 				if (err)
 					res.send(err)
 				res.json(todos);
