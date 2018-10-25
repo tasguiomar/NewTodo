@@ -2,7 +2,7 @@
  * AngularJS Material Design
  * https://github.com/angular/material
  * @license MIT
- * v1.1.10-master-e876eec
+ * v1.1.10
  */
 (function( window, angular, undefined ){
 "use strict";
@@ -103,20 +103,10 @@ MdChipCtrl.prototype.getChipContent = function() {
 
 
 /**
- * When editing the chip, if the user modifies the existing contents, we'll get a span back and
- * need to ignore text elements as they only contain blank space.
- * `children()` ignores text elements.
- *
- * When editing the chip, if the user deletes the contents and then enters some new content
- * we'll only get a text element back.
- * @return {Object} jQuery object representing the content element of the chip
+ * @return {Object} first content element of the chips content element
  */
 MdChipCtrl.prototype.getContentElement = function() {
-  var contentElement = angular.element(this.getChipContent().children()[0]);
-  if (!contentElement || contentElement.length === 0) {
-    contentElement = angular.element(this.getChipContent().contents()[0]);
-  }
-  return contentElement;
+  return angular.element(this.getChipContent().contents()[0]);
 };
 
 
@@ -133,9 +123,7 @@ MdChipCtrl.prototype.getChipIndex = function() {
  * If the contents were updated to be empty, remove the chip and re-focus the input element.
  */
 MdChipCtrl.prototype.goOutOfEditMode = function() {
-  if (!this.isEditing) {
-    return;
-  }
+  if (!this.isEditing) return;
 
   this.isEditing = false;
   this.$element.removeClass('_md-chip-editing');
@@ -144,7 +132,10 @@ MdChipCtrl.prototype.goOutOfEditMode = function() {
 
   var content = this.getContentElement().text();
   if (content) {
-    this.parentController.updateChipContents(chipIndex, content);
+    this.parentController.updateChipContents(
+        chipIndex,
+        this.getContentElement().text()
+    );
 
     this.$mdUtil.nextTick(function() {
       if (this.parentController.selectedChip === chipIndex) {
@@ -201,10 +192,11 @@ MdChipCtrl.prototype.goInEditMode = function() {
 MdChipCtrl.prototype.chipKeyDown = function(event) {
   if (!this.isEditing &&
     (event.keyCode === this.$mdConstant.KEY_CODE.ENTER ||
-      event.keyCode === this.$mdConstant.KEY_CODE.SPACE)) {
+    event.keyCode === this.$mdConstant.KEY_CODE.SPACE)) {
     event.preventDefault();
     this.goInEditMode();
-  } else if (this.isEditing && event.keyCode === this.$mdConstant.KEY_CODE.ENTER) {
+  } else if (this.isEditing &&
+    event.keyCode === this.$mdConstant.KEY_CODE.ENTER) {
     event.preventDefault();
     this.goOutOfEditMode();
   }
@@ -244,6 +236,13 @@ MdChip['$inject'] = ["$mdTheming", "$mdUtil", "$compile", "$timeout"];angular
  *
  */
 
+// This hint text is visually hidden within a chip but used by screen readers to
+// inform the user how they can interact with a chip.
+var DELETE_HINT_TEMPLATE = '\
+    <span ng-if="!$mdChipsCtrl.readonly" class="md-visually-hidden">\
+      {{$mdChipsCtrl.deleteHint}}\
+    </span>';
+
 /**
  * MDChip Directive Definition
  *
@@ -254,6 +253,8 @@ MdChip['$inject'] = ["$mdTheming", "$mdUtil", "$compile", "$timeout"];angular
  * ngInject
  */
 function MdChip($mdTheming, $mdUtil, $compile, $timeout) {
+  var deleteHintTemplate = $mdUtil.processTemplate(DELETE_HINT_TEMPLATE);
+
   return {
     restrict: 'E',
     require: ['^?mdChips', 'mdChip'],
@@ -270,6 +271,9 @@ function MdChip($mdTheming, $mdUtil, $compile, $timeout) {
 
     if (chipsController) {
       chipController.init(chipsController);
+
+      // Append our delete hint to the div.md-chip-content (which does not exist at compile time)
+      chipContentElement.append($compile(deleteHintTemplate)(scope));
 
       // When a chip is blurred, make sure to unset (or reset) the selected chip so that tabbing
       // through elements works properly
@@ -1005,7 +1009,6 @@ MdChipsCtrl.prototype.removeChip = function(index, event) {
   var removed = this.items.splice(index, 1);
 
   this.updateNgModel();
-  this.ngModelCtrl.$setDirty();
 
   if (removed && removed.length && this.useOnRemove && this.onRemove) {
     this.onRemove({ '$chip': removed[0], '$index': index, '$event': event });
@@ -1232,9 +1235,9 @@ MdChipsCtrl.prototype.configureUserInput = function(inputElement) {
   // Bind to keydown and focus events of input
   inputElement
       .attr({ tabindex: 0 })
-      .on('keydown', function(event) { scopeApplyFn(event, ctrl.inputKeydown); })
-      .on('focus', function(event) { scopeApplyFn(event, ctrl.onInputFocus); })
-      .on('blur', function(event) { scopeApplyFn(event, ctrl.onInputBlur); });
+      .on('keydown', function(event) { scopeApplyFn(event, ctrl.inputKeydown) })
+      .on('focus', function(event) { scopeApplyFn(event, ctrl.onInputFocus) })
+      .on('blur', function(event) { scopeApplyFn(event, ctrl.onInputBlur) });
 };
 
 /**
@@ -1435,7 +1438,7 @@ MdChipsCtrl.prototype.contentIdFor = function(index) {
    * @param {expression=} md-on-remove An expression which will be called when a chip has been
    *    removed with `$chip`, `$index`, and `$event` available as parameters.
    * @param {expression=} md-on-select An expression which will be called when a chip is selected.
-   * @param {boolean=} md-require-match If true, and the chips template contains an autocomplete,
+   * @param {boolean} md-require-match If true, and the chips template contains an autocomplete,
    *    only allow selection of pre-defined chips (i.e. you cannot add new ones).
    * @param {string=} input-aria-label A string read by screen readers to identify the input.
    * @param {string=} container-hint A string read by screen readers informing users of how to
@@ -1502,7 +1505,7 @@ MdChipsCtrl.prototype.contentIdFor = function(index) {
           {{$mdChipsCtrl.containerHint}}\
         </span>\
         <md-chip ng-repeat="$chip in $mdChipsCtrl.items"\
-            index="{{$index}}" aria-label="{{$mdChipsCtrl.deleteHint}}"\
+            index="{{$index}}"\
             ng-class="{\'md-focused\': $mdChipsCtrl.selectedChip == $index, \'md-readonly\': !$mdChipsCtrl.ngModelCtrl || $mdChipsCtrl.readonly}">\
           <div class="md-chip-content"\
               tabindex="{{$mdChipsCtrl.ariaTabIndex == $index ? 0 : -1}}"\
@@ -1573,24 +1576,24 @@ MdChipsCtrl.prototype.contentIdFor = function(index) {
       bindToController: true,
       compile: compile,
       scope: {
-        readonly: '=?readonly',
-        removable: '=?mdRemovable',
-        placeholder: '@?',
-        secondaryPlaceholder: '@?',
-        maxChips: '@?mdMaxChips',
+        readonly: '=readonly',
+        removable: '=mdRemovable',
+        placeholder: '@',
+        secondaryPlaceholder: '@',
+        maxChips: '@mdMaxChips',
         transformChip: '&mdTransformChip',
-        onAppend: '&?mdOnAppend',
-        onAdd: '&?mdOnAdd',
-        onRemove: '&?mdOnRemove',
-        onSelect: '&?mdOnSelect',
-        inputAriaLabel: '@?',
-        containerHint: '@?',
-        deleteHint: '@?',
-        deleteButtonLabel: '@?',
+        onAppend: '&mdOnAppend',
+        onAdd: '&mdOnAdd',
+        onRemove: '&mdOnRemove',
+        onSelect: '&mdOnSelect',
+        inputAriaLabel: '@',
+        containerHint: '@',
+        deleteHint: '@',
+        deleteButtonLabel: '@',
         separatorKeys: '=?mdSeparatorKeys',
         requireMatch: '=?mdRequireMatch',
         chipAppendDelayString: '@?mdChipAppendDelay',
-        ngChange: '&?'
+        ngChange: '&'
       }
     };
 
@@ -1784,18 +1787,6 @@ MdContactChipsCtrl.prototype.queryContact = function(searchText) {
   return this.contactQuery({'$query': searchText});
 };
 
-MdContactChipsCtrl.prototype.inputKeydown = function(event) {
-  if (!this.separatorKeys || this.separatorKeys.indexOf(event.keyCode) < 0) {
-    return;
-  }
-
-  event.stopPropagation();
-  event.preventDefault();
-
-  var autocompleteCtrl = angular.element(event.target).controller('mdAutocomplete');
-  autocompleteCtrl.select(autocompleteCtrl.index);
-};
-
 MdContactChipsCtrl.prototype.itemName = function(item) {
   return item[this.contactName];
 };
@@ -1816,9 +1807,8 @@ MdContactChips['$inject'] = ["$mdTheming", "$mdUtil"];angular
  * returns  a list of possible contacts. The user can select one of these and add it to the list of
  * chips.
  *
- * You may also use the <a ng-href="api/directive/mdHighlightText">md-highlight-flags</a> attribute
- * along with its parameters to control the appearance of the matched text inside of the contacts'
- * autocomplete popup.
+ * You may also use the `md-highlight-text` directive along with its parameters to control the
+ * appearance of the matched text inside of the contacts' autocomplete popup.
  *
  * @param {expression} ng-model Assignable AngularJS expression to be data-bound to the list of
  *    contact chips. The expression should evaluate to an `Object` Array.
@@ -1860,8 +1850,7 @@ var MD_CONTACT_CHIPS_TEMPLATE = '\
           ng-model="$mdContactChipsCtrl.contacts"\
           ng-change="$mdContactChipsCtrl.ngChange($mdContactChipsCtrl.contacts)"\
           md-require-match="$mdContactChipsCtrl.requireMatch"\
-          md-chip-append-delay="{{$mdContactChipsCtrl.chipAppendDelay}}"\
-          md-separator-keys="$mdContactChipsCtrl.separatorKeys"\
+          md-chip-append-delay="{{$mdContactChipsCtrl.chipAppendDelay}}" \
           md-autocomplete-snap>\
           <md-autocomplete\
               md-menu-class="md-contact-chips-suggestions"\
@@ -1872,7 +1861,6 @@ var MD_CONTACT_CHIPS_TEMPLATE = '\
               md-no-cache="true"\
               md-min-length="$mdContactChipsCtrl.minLength"\
               md-autoselect\
-              ng-keydown="$mdContactChipsCtrl.inputKeydown($event)"\
               placeholder="{{$mdContactChipsCtrl.contacts.length == 0 ?\
                   $mdContactChipsCtrl.placeholder : $mdContactChipsCtrl.secondaryPlaceholder}}">\
             <div class="md-contact-suggestion">\
@@ -1930,8 +1918,7 @@ function MdContactChips($mdTheming, $mdUtil) {
       requireMatch: '=?mdRequireMatch',
       minLength: '=?mdMinLength',
       highlightFlags: '@?mdHighlightFlags',
-      chipAppendDelay: '@?mdChipAppendDelay',
-      separatorKeys: '=?mdSeparatorKeys',
+      chipAppendDelay: '@?mdChipAppendDelay'
     }
   };
 
