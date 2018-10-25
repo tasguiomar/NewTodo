@@ -1,5 +1,5 @@
 var Todo = require('./models/todo');
-//var user = require('request'); vamos ver ainda como vu buscar o user indicado
+const basicAuth = require('basic-auth');
 
 module.exports = function(app) {
 
@@ -20,9 +20,11 @@ module.exports = function(app) {
 
 	// create todo and send back all todos after creation
 	app.post('/api/todos', function(req, res) {
-
+		var test = basicAuth(req);
+		
 
 		Todo.create({
+			//user : test.name,
 			text : req.body.text,
 			done : false
 		}, function(err, todo) {
