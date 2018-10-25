@@ -23,7 +23,7 @@ module.exports = function(app) {
 
 
 		Todo.create({
-			text : req.text,
+			text : req.body.text,
 			done : false
 		}, function(err, todo) {
 			if (err)

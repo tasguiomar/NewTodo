@@ -16,16 +16,12 @@ var mongoose = require('mongoose'); 					// mongoose for mongodb
 
 mongoose.connect(database.url); 	// connect to mongoDB database on modulus.io
 app.use(morgan('dev')); 
-app.use(methodOverride());
-
-require('./app/routes.js')(app);
-
-
-
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.json({ type: 'application/vnd.api+json' })); 
+app.use(methodOverride());
 app.use(session({ secret: config.secret, resave: false, saveUninitialized: true }));
 
 // use JWT auth to secure the api
@@ -36,8 +32,10 @@ app.use('/login', require('./controllers/login.controller'));
 app.use('/register', require('./controllers/register.controller'));
 app.use('/app', require('./controllers/app.controller'));
 app.use('/api/users', require('./controllers/api/users.controller'));
+//---------
+require('./app/routes.js')(app);
 
-//app.use('/api/home', require('.//app/home/core'));
+
 
 // make '/app' default route
 app.get('/', function (req, res) {
