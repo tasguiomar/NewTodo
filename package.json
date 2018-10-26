@@ -1,11 +1,6 @@
 {
-  "name": "mean-stack-registration-login-example",
-  "version": "1.0.0",
-  "description": "MEAN Stack User Registration and Login Example Application",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cornflourblue/mean-stack-registration-login-example.git"
-  },
+  
+
   "dependencies": {
     "angular-material": "http://github.com/angular/bower-material/tarball/v1.1.9",
     "bcryptjs": "^2.1.0",
