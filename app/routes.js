@@ -2,6 +2,7 @@ var Todo = require('./models/todo');
 var username = require('username');
 var jwt = require('jsonwebtoken');
 var userService = require('../config.json');
+require('dotenv').config()
 
 module.exports = function (app) {
 
@@ -79,7 +80,7 @@ module.exports = function (app) {
 
 			req.token = bearerToken;
 		
-			jwt.verify(bearerToken, userService.secret, (err, result) => {
+			jwt.verify(bearerToken, process.env.secret, (err, result) => {
 
 				if (err) {
 					res.sendStatus(403);
