@@ -1,7 +1,5 @@
 var Todo = require('./models/todo');
-var username = require('username');
 var jwt = require('jsonwebtoken');
-var userService = require('../config.json');
 require('dotenv').config()
 
 module.exports = function (app) {
@@ -25,7 +23,6 @@ module.exports = function (app) {
 
 	// create todo and send back all todos after creation
 	app.post('/api/todos', verifyToken, function (req, res) {
-		console.log("----------------estou aqui------------");
 
 		Todo.create({
 			userDb: req.result.sub,
@@ -71,7 +68,7 @@ module.exports = function (app) {
 		const bearerHeader = req.headers['authorization'];
 		//check if bearer id undefine
 		if (typeof bearerHeader !== 'undefined') {
-			console.log(req.headers)
+			
 			//split at the space
 			const bearer = bearerHeader.split(' ')
 			//get token from array

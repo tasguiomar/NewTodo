@@ -1,5 +1,0 @@
-﻿{
-    "connectionString": "mongodb://localhost:27017/NewTodo",
-    "apiUrl": "http://localhost:3000/api",
-    "secret": "lS14MmXF3NL3Rchdm2abOCJYDbz81X9s2fVo1dsz8V8accZmTwSyTL0KZ0ujSQVszBy8t3BUzoafEnq6hCEPCZNRLt7yDtDtHtoS"
-}

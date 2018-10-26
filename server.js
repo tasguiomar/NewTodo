@@ -4,7 +4,7 @@ var app = express();
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var expressJwt = require('express-jwt');
-var config = require('config.json');
+require('dotenv').config()
 
 
 var database = require('./config/database'); 			// load the database config
@@ -22,10 +22,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' })); 
 app.use(methodOverride());
-app.use(session({ secret: config.secret, resave: false, saveUninitialized: true }));
+app.use(session({ secret: process.env.secret, resave: false, saveUninitialized: true }));
 
 // use JWT auth to secure the api
-app.use('/api', expressJwt({ secret: config.secret }).unless({ path: ['/api/users/authenticate', '/api/users/register'] }));
+app.use('/api', expressJwt({ secret: process.env.secret }).unless({ path: ['/api/users/authenticate', '/api/users/register'] }));
 
 // routes
 app.use('/login', require('./controllers/login.controller'));
